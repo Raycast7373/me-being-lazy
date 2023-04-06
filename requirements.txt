@@ -1,0 +1,7 @@
+openai
+
+#DISCORD
+discord.py
+
+#TELEGRAM
+python-telegram-bot
