@@ -4,4 +4,4 @@ openai
 discord.py
 
 #TELEGRAM
-python-telegram-bot
+aiogram
