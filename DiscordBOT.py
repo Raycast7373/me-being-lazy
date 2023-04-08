@@ -5,7 +5,8 @@ import os
 DISCORD_BOT_TOKEN = 'YOUR_DISCORD_BOT_TOKEN_HERE'
 OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE'
 
-client = discord.Client()
+intents = discord.Intents(messages=True, message_content=True)
+bot = discord.Client(intents=intents)
 openai.api_key = OPENAI_API_KEY
 
 def generate_response(user_message):
@@ -20,18 +21,29 @@ def generate_response(user_message):
 
     return response.choices[0].text.strip()
 
-@client.event
+@bot.event
 async def on_ready():
-    print(f'{client.user} has connected to Discord!')
+    print(f'{bot.user} has connected to Discord!')
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
+@bot.event
+async def on_message(ctx):
+    if ctx.author == bot.user:
         return
+    user = ctx.author
+    user_message = ctx.content
+    channel = ctx.channel
+    dumessage = f'{user}: {user_message}'
+    lemessage = [{"role": "user", "content": dumessage}]
+    async with channel.typing():    
+        ai_response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=lemessage,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+        response = ai_response.choices[0].message.content.strip()
+        await ctx.channel.send(response)
 
-    user_message = message.content
-    response = generate_response(user_message)
-
-    await message.channel.send(response)
-
-client.run(DISCORD_BOT_TOKEN)
+bot.run(DISCORD_BOT_TOKEN)
